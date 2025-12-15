@@ -1,9 +1,20 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export default function LoginPage() {
+    const router = useRouter();
+
+    const handleLogin = (e: React.FormEvent) => {
+        e.preventDefault();
+        // Mock login - redirect to dashboard
+        router.push("/dashboard");
+    };
+
     return (
         <div className="w-full max-w-md space-y-8">
             <div className="text-center">
@@ -11,7 +22,7 @@ export default function LoginPage() {
                 <p className="mt-2 text-sm text-zinc-400">Entre na sua conta para gerenciar seus blocos.</p>
             </div>
 
-            <div className="space-y-6">
+            <form onSubmit={handleLogin} className="space-y-6">
                 <div className="space-y-2">
                     <Label htmlFor="email" className="text-zinc-300">Email</Label>
                     <Input id="email" type="email" placeholder="nome@empresa.com" className="bg-white/5 border-white/10 text-white placeholder:text-zinc-600 focus-visible:ring-indigo-500" />
@@ -24,8 +35,8 @@ export default function LoginPage() {
                     <Input id="password" type="password" className="bg-white/5 border-white/10 text-white focus-visible:ring-indigo-500" />
                 </div>
 
-                <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white">Entrar</Button>
-            </div>
+                <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white">Entrar</Button>
+            </form>
 
             <div className="text-center text-sm text-zinc-400">
                 Não tem uma conta?{" "}
