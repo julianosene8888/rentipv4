@@ -56,16 +56,14 @@ export function Sidebar() {
                     ))}
                 </nav>
 
-                {/* Owner Specific Actions */}
-                {userRole === "OWNER" && (
-                    <div className="mt-8">
-                        <h4 className="px-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Parceiro</h4>
-                        <Link href="/dashboard/register-block" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">
-                            <PlusCircle className="h-5 w-5" />
-                            Cadastrar Bloco
-                        </Link>
-                    </div>
-                )}
+                {/* Owner Specific Actions - Visible for Demo */}
+                <div className="mt-8">
+                    <h4 className="px-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Parceiro (Demo)</h4>
+                    <Link href="/dashboard/register-block" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">
+                        <PlusCircle className="h-5 w-5" />
+                        Cadastrar Bloco
+                    </Link>
+                </div>
 
                 {/* Admin Specific Actions */}
                 <div className="mt-8">
