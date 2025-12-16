@@ -1,10 +1,26 @@
-"use client";
-
 import { IpamBlock } from "@/components/dashboard/ipam/IpamBlock";
 import { Button } from "@/components/ui/button";
 import { Filter, RefreshCcw } from "lucide-react";
+import { prisma } from "@/lib/prisma";
+import { cn } from "@/lib/utils";
 
-export default function IpamPage() {
+export default async function IpamPage() {
+    // Fetch all blocks
+    const blocks = await prisma.ipBlock.findMany({
+        orderBy: { cidr: 'asc' },
+        include: {
+            renter: {
+                select: {
+                    name: true,
+                    company: true
+                }
+            }
+        }
+    });
+
+    // Group blocks by /22 or ASN just for visualization grouping (simplified here)
+    // We will just list them for now to ensure data connectivity
+
     return (
         <div className="space-y-8">
             <div className="flex items-center justify-between">
@@ -24,39 +40,28 @@ export default function IpamPage() {
                 </div>
             </div>
 
-            {/* Main Block Container - Example /22 split */}
             <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                     <span className="w-2 h-8 rounded-sm bg-indigo-500 inline-block"></span>
-                    Bloco Principal 200.150.100.0/22 (ASN 42000)
+                    Blocos Cadastrados (Todos)
                 </h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-6 rounded-xl border border-white/10 bg-black/40">
-                    {/* Subnet 1: Rented */}
-                    <IpamBlock cidr="200.150.100.0/24" status="RENTED" renterName="Provedor XYZ" />
-
-                    {/* Subnet 2: Suspended (Payment Issue) */}
-                    <IpamBlock cidr="200.150.101.0/24" status="SUSPENDED" renterName="HostLtda (Inadimplente)" />
-
-                    {/* Subnet 3: Available */}
-                    <IpamBlock cidr="200.150.102.0/24" status="AVAILABLE" />
-
-                    {/* Subnet 4: Available */}
-                    <IpamBlock cidr="200.150.103.0/24" status="AVAILABLE" />
-                </div>
-            </div>
-
-            {/* Another Block Example */}
-            <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                    <span className="w-2 h-8 rounded-sm bg-purple-500 inline-block"></span>
-                    Bloco Principal 170.20.0.0/23 (ASN 15000)
-                </h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 rounded-xl border border-white/10 bg-black/40">
-                    <IpamBlock cidr="170.20.0.0/24" status="RENTED" renterName="TechCorp S.A" />
-                    <IpamBlock cidr="170.20.1.0/24" status="RESERVED" renterName="Uso Interno" />
-                </div>
+                {blocks.length === 0 ? (
+                    <div className="p-8 text-center border border-white/10 rounded-xl bg-white/5 text-zinc-500">
+                        Nenhum bloco cadastrado no sistema.
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-6 rounded-xl border border-white/10 bg-black/40">
+                        {blocks.map((block) => (
+                            <IpamBlock
+                                key={block.id}
+                                cidr={block.cidr}
+                                status={block.status}
+                                renterName={block.renter?.company || block.renter?.name || (block.status === 'SUSPENDED' ? 'Inadimplente' : undefined)}
+                            />
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );

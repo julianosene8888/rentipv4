@@ -1,15 +1,38 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import { CheckCircle, CreditCard, ShieldCheck } from "lucide-react";
 import Link from "next/link";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
+import { redirect } from "next/navigation";
+import { rentBlock } from "@/lib/actions";
 
-export default function CheckoutPage() {
+export default async function CheckoutPage({ searchParams }: { searchParams: { cidr?: string } }) {
+    const session = await auth();
+    if (!session) redirect("/login");
+
+    const cidr = searchParams.cidr;
+    if (!cidr) redirect("/");
+
+    const block = await prisma.ipBlock.findUnique({
+        where: { cidr },
+    });
+
+    if (!block || block.status !== "AVAILABLE") {
+        return (
+            <div className="text-center p-12">
+                <h1 className="text-xl text-red-500">Bloco indisponível.</h1>
+                <Link href="/"><Button className="mt-4">Voltar</Button></Link>
+            </div>
+        );
+    }
+
+    const rentAction = rentBlock.bind(null, cidr);
+
     return (
         <div className="max-w-3xl mx-auto space-y-8">
             <div>
                 <h1 className="text-2xl font-bold tracking-tight text-white">Finalizar Locação</h1>
-                <p className="text-zinc-400">Você está alugando o bloco 200.150.102.0/24</p>
+                <p className="text-zinc-400">Você está alugando o bloco <span className="text-white font-mono font-bold">{block.cidr}</span></p>
             </div>
 
             <div className="grid md:grid-cols-2 gap-8">
@@ -18,7 +41,7 @@ export default function CheckoutPage() {
                         <h3 className="font-semibold text-white">Resumo do Pedido</h3>
                         <div className="flex justify-between text-sm">
                             <span className="text-zinc-400">Bloco IPv4 (/24)</span>
-                            <span className="text-white">R$ 1.250,00</span>
+                            <span className="text-white">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(block.price))}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-zinc-400">Taxa de Setup</span>
@@ -26,7 +49,7 @@ export default function CheckoutPage() {
                         </div>
                         <div className="pt-4 border-t border-white/10 flex justify-between font-bold text-lg">
                             <span className="text-white">Total Mensal</span>
-                            <span className="text-white">R$ 1.250,00</span>
+                            <span className="text-white">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(block.price))}</span>
                         </div>
                     </div>
 
@@ -51,11 +74,11 @@ export default function CheckoutPage() {
                         </div>
 
                         <div className="pt-4">
-                            <Link href="/dashboard/billing">
-                                <Button className="w-full bg-indigo-600 hover:bg-indigo-700 py-6">
+                            <form action={rentAction}>
+                                <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 py-6">
                                     Confirmar e Pagar
                                 </Button>
-                            </Link>
+                            </form>
                             <p className="text-center text-xs text-zinc-500 mt-2">
                                 Ao confirmar, você concorda com os termos de uso.
                             </p>

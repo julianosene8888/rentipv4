@@ -45,7 +45,7 @@ export function IpamBlock({ cidr, status, renterName, className }: IpamBlockProp
             {/* Hover Actions */}
             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px] gap-2">
                 {status === "AVAILABLE" && (
-                    <Link href="/dashboard/checkout" className="contents">
+                    <Link href={`/dashboard/checkout?cidr=${encodeURIComponent(cidr)}`} className="contents">
                         <Button size="sm" className="h-8 text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
                             Alugar
                         </Button>

@@ -1,15 +1,17 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import { Download, CreditCard, CheckCircle, Clock, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
 
-export default function BillingPage() {
-    const invoices = [
-        { id: "INV-2025-001", date: "15/01/2026", amount: "R$ 1.250,00", status: "PENDING" },
-        { id: "INV-2024-128", date: "15/12/2025", amount: "R$ 1.250,00", status: "PAID" },
-        { id: "INV-2024-115", date: "15/11/2025", amount: "R$ 1.250,00", status: "PAID" },
-    ];
+export default async function BillingPage() {
+    const session = await auth();
+    if (!session?.user?.id) return null;
+
+    const invoices = await prisma.invoice.findMany({
+        where: { userId: session.user.id },
+        orderBy: { dueDate: 'desc' },
+    });
 
     return (
         <div className="space-y-8">
@@ -35,49 +37,57 @@ export default function BillingPage() {
 
             {/* Invoices List */}
             <div className="rounded-xl border border-white/10 bg-black/40 overflow-hidden">
-                <table className="w-full text-sm text-left">
-                    <thead className="bg-white/5 text-zinc-400">
-                        <tr>
-                            <th className="px-6 py-4 font-medium">Fatura #</th>
-                            <th className="px-6 py-4 font-medium">Vencimento</th>
-                            <th className="px-6 py-4 font-medium">Valor</th>
-                            <th className="px-6 py-4 font-medium">Status</th>
-                            <th className="px-6 py-4 font-medium text-right">Ação</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/10 text-zinc-300">
-                        {invoices.map((invoice, i) => (
-                            <tr key={i} className="hover:bg-white/5 transition-colors">
-                                <td className="px-6 py-4 font-medium text-white">{invoice.id}</td>
-                                <td className="px-6 py-4">{invoice.date}</td>
-                                <td className="px-6 py-4 font-mono">{invoice.amount}</td>
-                                <td className="px-6 py-4">
-                                    <span className={cn(
-                                        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium border",
-                                        invoice.status === "PAID"
-                                            ? "bg-green-500/10 text-green-500 border-green-500/20"
-                                            : "bg-yellow-500/10 text-yellow-500 border-yellow-500/20"
-                                    )}>
-                                        {invoice.status === "PAID" ? <CheckCircle className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
-                                        {invoice.status === "PAID" ? "Pago" : "Pendente"}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4 text-right">
-                                    {invoice.status === "PENDING" ? (
-                                        <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
-                                            Pagar Agora
-                                        </Button>
-                                    ) : (
-                                        <Button variant="ghost" size="sm" className="hover:text-white hover:bg-white/10">
-                                            <Download className="h-4 w-4 mr-2" />
-                                            PDF
-                                        </Button>
-                                    )}
-                                </td>
+                {invoices.length === 0 ? (
+                    <div className="p-8 text-center text-zinc-500">
+                        Nenhuma fatura encontrada.
+                    </div>
+                ) : (
+                    <table className="w-full text-sm text-left">
+                        <thead className="bg-white/5 text-zinc-400">
+                            <tr>
+                                <th className="px-6 py-4 font-medium">Fatura #</th>
+                                <th className="px-6 py-4 font-medium">Vencimento</th>
+                                <th className="px-6 py-4 font-medium">Valor</th>
+                                <th className="px-6 py-4 font-medium">Status</th>
+                                <th className="px-6 py-4 font-medium text-right">Ação</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody className="divide-y divide-white/10 text-zinc-300">
+                            {invoices.map((invoice) => (
+                                <tr key={invoice.id} className="hover:bg-white/5 transition-colors">
+                                    <td className="px-6 py-4 font-medium text-white">{invoice.id.slice(0, 8).toUpperCase()}...</td>
+                                    <td className="px-6 py-4">{new Date(invoice.dueDate).toLocaleDateString('pt-BR')}</td>
+                                    <td className="px-6 py-4 font-mono">
+                                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(invoice.amount))}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <span className={cn(
+                                            "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium border",
+                                            invoice.status === "PAID"
+                                                ? "bg-green-500/10 text-green-500 border-green-500/20"
+                                                : "bg-yellow-500/10 text-yellow-500 border-yellow-500/20"
+                                        )}>
+                                            {invoice.status === "PAID" ? <CheckCircle className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
+                                            {invoice.status === "PAID" ? "Pago" : "Pendente"}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 text-right">
+                                        {invoice.status === "PENDING" ? (
+                                            <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
+                                                Pagar Agora
+                                            </Button>
+                                        ) : (
+                                            <Button variant="ghost" size="sm" className="hover:text-white hover:bg-white/10">
+                                                <Download className="h-4 w-4 mr-2" />
+                                                PDF
+                                            </Button>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
             </div>
 
             <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 flex gap-3 items-start">

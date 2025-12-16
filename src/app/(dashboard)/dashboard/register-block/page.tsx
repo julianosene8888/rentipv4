@@ -1,5 +1,6 @@
 "use client";
 
+import { registerBlockAction } from "@/lib/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,17 +14,17 @@ export default function RegisterBlockPage() {
                 <p className="text-zinc-400">Rentabilize seus endereços IPv4 ociosos com segurança.</p>
             </div>
 
-            <div className="p-6 rounded-xl bg-white/5 border border-white/10 space-y-6">
+            <form action={registerBlockAction} className="p-6 rounded-xl bg-white/5 border border-white/10 space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                         <Label htmlFor="cidr" className="text-zinc-300">Bloco (CIDR)</Label>
-                        <Input id="cidr" placeholder="Ex: 200.10.20.0/24" className="bg-black/20 border-white/10 text-white focus-visible:ring-indigo-500" />
+                        <Input name="cidr" id="cidr" placeholder="Ex: 200.10.20.0/24" required className="bg-black/20 border-white/10 text-white focus-visible:ring-indigo-500" />
                         <p className="text-xs text-zinc-500">Mínimo aceito: /24 (256 IPs)</p>
                     </div>
 
                     <div className="space-y-2">
                         <Label htmlFor="asn" className="text-zinc-300">ASN de Origem</Label>
-                        <Input id="asn" placeholder="AS12345" className="bg-black/20 border-white/10 text-white focus-visible:ring-indigo-500" />
+                        <Input name="asn" id="asn" placeholder="AS12345" required className="bg-black/20 border-white/10 text-white focus-visible:ring-indigo-500" />
                     </div>
                 </div>
 
@@ -31,7 +32,7 @@ export default function RegisterBlockPage() {
                     <Label htmlFor="price" className="text-zinc-300">Valor Esperado (Mensal)</Label>
                     <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">R$</span>
-                        <Input id="price" placeholder="0,00" className="pl-10 bg-black/20 border-white/10 text-white focus-visible:ring-indigo-500" />
+                        <Input name="price" id="price" placeholder="0,00" required className="pl-10 bg-black/20 border-white/10 text-white focus-visible:ring-indigo-500" />
                     </div>
                 </div>
 
@@ -55,10 +56,10 @@ export default function RegisterBlockPage() {
                 </div>
 
                 <div className="flex justify-end gap-3 pt-4">
-                    <Button variant="ghost" className="text-zinc-400 hover:text-white">Cancelar</Button>
-                    <Button className="bg-indigo-600 hover:bg-indigo-700">Enviar para Análise</Button>
+                    <Button type="button" variant="ghost" className="text-zinc-400 hover:text-white">Cancelar</Button>
+                    <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700">Enviar para Análise</Button>
                 </div>
-            </div>
+            </form>
         </div>
     );
 }
