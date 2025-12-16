@@ -10,7 +10,8 @@ import {
     Settings,
     LogOut,
     PlusCircle,
-    ShieldAlert
+    ShieldAlert,
+    User
 } from "lucide-react";
 
 const sidebarItems = [
@@ -71,6 +72,10 @@ export function Sidebar() {
                     <Link href="/dashboard/ipam" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">
                         <ShieldAlert className="h-5 w-5" />
                         Gestão IPAM
+                    </Link>
+                    <Link href="/dashboard/users" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">
+                        <User className="h-5 w-5" />
+                        Gestão de Usuários
                     </Link>
                 </div>
             </div>

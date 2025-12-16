@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import { ShieldAlert, Unlock, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 type BlockStatus = "AVAILABLE" | "RENTED" | "SUSPENDED" | "RESERVED";
 
@@ -44,9 +45,11 @@ export function IpamBlock({ cidr, status, renterName, className }: IpamBlockProp
             {/* Hover Actions */}
             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px] gap-2">
                 {status === "AVAILABLE" && (
-                    <Button size="sm" className="h-8 text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
-                        Alugar
-                    </Button>
+                    <Link href="/dashboard/checkout" className="contents">
+                        <Button size="sm" className="h-8 text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
+                            Alugar
+                        </Button>
+                    </Link>
                 )}
                 {status === "RENTED" && (
                     <Button size="sm" variant="destructive" className="h-8 text-xs">

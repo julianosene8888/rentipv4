@@ -1,0 +1,76 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  RENTER
+  OWNER
+  ADMIN
+}
+
+enum BlockStatus {
+  AVAILABLE
+  RENTED
+  SUSPENDED
+  RESERVED
+}
+
+enum InvoiceStatus {
+  PENDING
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String // Hashed
+  name      String?
+  company   String?
+  role      UserRole @default(RENTER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  rentedBlocks IpBlock[]      @relation("RenterBlocks")
+  ownedBlocks  IpBlock[]      @relation("OwnerBlocks")
+  invoices     Invoice[]
+}
+
+model IpBlock {
+  id          String      @id @default(cuid())
+  cidr        String      @unique // e.g. 192.168.1.0/24
+  asn         String?     // AS12345
+  status      BlockStatus @default(AVAILABLE)
+  price       Decimal     @default(0.00)
+  loaUrl      String?     // Path to LOA PDF
+  
+  renterId    String?
+  renter      User?       @relation("RenterBlocks", fields: [renterId], references: [id])
+  
+  ownerId     String?
+  owner       User?       @relation("OwnerBlocks", fields: [ownerId], references: [id])
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Invoice {
+  id        String        @id @default(cuid())
+  amount    Decimal
+  dueDate   DateTime
+  status    InvoiceStatus @default(PENDING)
+  monthRef  String        // MM/YYYY
+  pdfUrl    String?
+  
+  userId    String
+  user      User          @relation(fields: [userId], references: [id])
+  
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
